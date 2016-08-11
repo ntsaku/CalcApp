@@ -30,39 +30,74 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onClick(View v) {
-        int ans = 0;
-        double ansd = 0.0;
+        double d1 = 0, d2 = 0, ansd = 0;
+        String ansMsg = null;
         Intent intent = new Intent(this, SecondActivity.class);
+        String errMsg = null;
+        boolean isErr = false;
 
         EditText mEditText1 = (EditText) findViewById(R.id.editText1);
         EditText mEditText2 = (EditText) findViewById(R.id.editText2);
 
+
+//        EditText に設定された値が数値型かisNumberメソッドでチェックする。
+//        チェック結果は isErr 変数に設定して：
+//        * 数値型の場合(isErr == false)、指定された四則演算を実施し、その結果を putExtra()の VALUE1にString型でわたす。
+//        * 数値型でない場合(isErr == true)、そのエラーメッセージを putExtra()のVALUE1にString型でわたす。
+
         String str1 = mEditText1.getText().toString();
-        int i1 = Integer.parseInt(str1);
+        if (isNumber(str1)){
+            d1 = Double.valueOf(str1);
+        } else {
+            isErr = true;
+            errMsg = "[エラー]数値ではありません：(値1)" + str1;
+        }
         String str2 = mEditText2.getText().toString();
-        int i2 = Integer.parseInt(str2);
+        if (isNumber(str2)){
+            d2 = Double.valueOf(str2);
+        } else {
+            if (isErr) {
+                errMsg = "[エラー]数値ではありません：(値1)" + str1 + " (値2)" + str2;
+            } else {
+                isErr = true;
+                errMsg ="[エラー]数値ではありません：(値2)" + str2;
+            }
+        }
 
-//        処理が＋、－、×の場合は、結果を整数表示したいので　putExtra()のVALUE1にint型でわたす。
-//        処理が÷の場合は、結果を小数点対応するため、VALUE1にdouble型でわたす。
-//        SecondActivity画面で、 getIntExtra() getDoubleExtra()のどちらで受け取るべきかを判断するために、VALUE2に 1(int型)、0(double型)をわたす。
-
-        if (v.getId() == R.id.buttonTasu) {
-            ans = i1 + i2;
-            intent.putExtra("VALUE1",ans);
-            intent.putExtra("VALUE2", 1);
-        } else if (v.getId() == R.id.buttonHiku) {
-            ans = i1 - i2;
-            intent.putExtra("VALUE1",ans);
-            intent.putExtra("VALUE2", 1);
-        } else if (v.getId() == R.id.buttonKake) {
-            ans = i1 * i2;
-            intent.putExtra("VALUE1",ans);
-            intent.putExtra("VALUE2", 1);
-        } else if (v.getId() == R.id.buttonWaru) {
-            ansd = (double)i1 / (double)i2;
-            intent.putExtra("VALUE1",ansd);
-            intent.putExtra("VALUE2", 0);
+        if (isErr) {
+            intent.putExtra("VALUE1",errMsg);
+        } else {
+            if (v.getId() == R.id.buttonTasu) {
+                ansd =  d1 + d2;
+                ansMsg = String.valueOf(ansd);
+            } else if (v.getId() == R.id.buttonHiku) {
+                ansd = d1 - d2;
+                ansMsg = String.valueOf(ansd);
+            } else if (v.getId() == R.id.buttonKake) {
+                ansd = d1 * d2;
+                ansMsg = String.valueOf(ansd);
+            } else if (v.getId() == R.id.buttonWaru) {
+                if (d2 == 0) {
+                    ansMsg = "[エラー]割り算の分母(値2)が0です。";
+                } else {
+                    ansd = d1 / d2;
+                    ansMsg = String.valueOf(ansd);
+                }
+            }
+            intent.putExtra("VALUE1",ansMsg);
         }
         startActivity(intent);
     }
+
+//    引数が数値(double)か否かをチェックする。
+    public boolean isNumber(String val) {
+        try {
+            Double.parseDouble(val);
+            return true;
+        } catch (NumberFormatException nfex) {
+            return false;
+        }
+    }
 }
+
+
